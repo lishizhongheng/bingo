@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.0" halcon_version="10.0" cs="606932425">
+<procedure name="main">
+<interface/>
+<body>
+<l>dev_clear_window ()</l>
+<l>path  := './text_image_data/2.BMP'</l>
+<l>set_system ('mmx_enable', 'true')</l>
+<l>read_image (Image, path)</l>
+<l>* decompose3 (Image, ImageR, ImageG, ImageB)</l>
+<l>* emphasize (Image, ImageEmphasize, 11,11, 13)</l>
+<l>gen_rectangle1 (ROI, 20, 199.783, 365.571, 397.164)</l>
+<l>reduce_domain (Image, ROI, Image_model)</l>
+<l>crop_domain (Image_model, ImagePart)</l>
+<l>mean_image (ImagePart, ImageMean1,6, 3)</l>
+<l>get_image_pointer1 (ImagePart, Pointer1, Type1, Width2, Height2)</l>
+<l>dev_open_window_fit_image (ImagePart, 0, 0,  Width2, Height2, WindowHandle2)</l>
+<c></c>
+<l>create_local_deformable_model (ImagePart, 'auto', -0.39, 0.79, 'auto', 1, 1, 'auto', 1, 1, 'auto', 'none', 'use_polarity', 'auto', 'auto', [], [], ModelID1)</l>
+<l>get_deformable_model_contours (ModelContours, ModelID1, 1)</l>
+<c></c>
+<l>union_cocircular_contours_xld (ModelContours, UnionContours, 0.5, 0.1, 0.2, 30, 10, 10, 'true', 1)</l>
+<l>union_collinear_contours_xld (UnionContours, UnionContours1, 10, 1, 2, 0.1, 'attr_keep')</l>
+<l>union_adjacent_contours_xld (UnionContours1, UnionContours2, 10, 1, 'attr_keep')</l>
+<l>select_contours_xld (UnionContours2, SelectedContours, 'contour_length', 100, 20000, -0.5, 0.5)</l>
+<l>dev_set_line_width (3)</l>
+<l>dev_display (SelectedContours)</l>
+<l>area_center (Image_model, Area4, Row8, Column8)</l>
+<l>hom_mat2d_identity (HomMat2DIdentity)</l>
+<l>hom_mat2d_translate (HomMat2DIdentity, Row8, Column8, HomMat2DTranslate)</l>
+<c>*注意Row8 与  Column8 转换</c>
+<l>affine_trans_contour_xld (SelectedContours, ContoursAffinTrans1, HomMat2DTranslate)</l>
+<l>dev_display (Image)</l>
+<l>dev_display (ContoursAffinTrans1) </l>
+<c></c>
+<c></c>
+<c></c>
+<l>Smoothness := 3</l>
+<c>*29----17</c>
+<c>*9---15</c>
+<c>*3---14</c>
+<l>path  := './24.BMP'</l>
+<l>read_image (Image1, path)</l>
+<l>* decompose3 (Image1, ImageR1, ImageG1, ImageB1)</l>
+<l>* emphasize (Image1, ImageEmphasize, 11,11, 13)</l>
+<l>mean_image (Image1, ImageMean2,6,3)</l>
+<l>get_image_size (ImageMean2, Width3, Height3)</l>
+<l>dev_open_window_fit_image (Image1, 0, 0,  Width3, Height3, WindowHandle3)</l>
+<c></c>
+<l>count_seconds (Seconds1)</l>
+<l>find_local_deformable_model (Image1, ImageRectified1, VectorField1, DeformedContours1, ModelID1, rad(-180), rad(180),\
+                             1,1,1,1,\
+                             0.32, 0, 0.5, 2, 1,\               
+                             ['vector_field','deformed_contours'], ['deformation_smoothness','expand_border','subpixel'], \
+                             [Smoothness,0,0], Score1, Row_m, Column_m)</l>
+<l>union_cocircular_contours_xld (DeformedContours1, UnionContours3, 0.5, 0.1, 0.2, 30, 10, 10, 'true', 1)</l>
+<l>union_collinear_contours_xld (UnionContours3, UnionContours4, 10, 1, 2, 0.1, 'attr_keep')</l>
+<l>union_adjacent_contours_xld (UnionContours4, UnionContours5, 10, 1, 'attr_keep')</l>
+<l>select_contours_xld (UnionContours5, SelectedContours1, 'contour_length', 100, 20000, -0.5, 0.5)</l>
+<l>count_obj (SelectedContours1, Number3)</l>
+<l>* area_center_xld (SelectedContours1, Area5, Row_Con, Column_Con, PointOrder)</l>
+<l>dev_clear_window ( )</l>
+<l>dev_display (Image1)</l>
+<l>dev_display (SelectedContours1)</l>
+<l>* projective_trans_contour_xld (SelectedContours1, ContoursProjTrans, HomMat2DTranslate)</l>
+<l>Num := |Score1|</l>
+<l>for index := 1 to Num by 1</l>
+<l>    if(Score1[index-1]&gt;0.35)</l>
+<l>    disp_message (WindowHandle3, index, 'ImageMean2', Row_m[index-1], Column_m[index-1], 'black', 'true')   </l>
+<l>    endif</l>
+<l>endfor</l>
+<l>count_seconds (Seconds2)</l>
+<l>time := Seconds2 - Seconds1</l>
+<l>disp_message (WindowHandle3, time, 'ImageMean2', 0, 0, 'black', 'true')</l>
+<c></c>
+<l>stop ( )</l>
+<c>*轻度黏连，大可降低覆盖率，提高识别度，运行时间大大缩短。x</c>
+<c>*识别度0.4--覆盖率0.3---smooth16,对于16。</c>
+<c>*识别度0.35--覆盖率0.5---smooth19  对于4,6,7,24，19，16，13,12,26,42,54，51</c>
+<c>*识别度0.3--覆盖率0.5---smooth 9 对于 24,39(尾端缺角)</c>
+<c>*识别度0.2--覆盖率0.4---smooth 3 对于 57 (时间久)</c>
+<c>*22比较特殊</c>
+<c>*直接采用彩色相机效果如何</c>
+<c>*rad(3) 跟换 pixel 为angle_step 之后，速度提高5倍,黏连程度不高以及形状不要过于怪异的情况下</c>
+<c>*使用subpixel精度比较高，时间久，使用angle_step，速度快，但是精度略差。</c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>
