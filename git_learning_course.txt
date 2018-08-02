@@ -1,3 +1,79 @@
 7_25
 1——this responisty is used to record the process
 2——https://www.cnblogs.com/hustdc/p/6442290.html---总结得相当的好。
+3——分支处理
+***********************************************************************
+2. 查看所有分支
+git branch --all  
+# 默认只有master分支，所以会看到如下两个分支
+# master[本地主分支] origin/master[远程主分支]
+# 新克隆下来的代码默认master和origin/master是关联的，也就是他们的代码保持同步
+
+3. 创建本地新的dev分支
+git branch dev  # 创建本地分支
+git branch  # 查看分支
+# 这是会看到master和dev，而且master上会有一个星号
+# 这个时候dev是一个本地分支，远程仓库不知道它的存在
+# 本地分支可以不同步到远程仓库，我们可以在dev开发，然后merge到master，使用master同步代码，当然也可以同步
+
+4. 发布dev分支
+发布dev分支指的是同步dev分支的代码到远程服务器
+git push origin dev:dev  # 这样远程仓库也有一个dev分支了
+
+5. 在dev分支开发代码
+git checkout dev  # 切换到dev分支进行开发
+# 开发代码之后，我们有两个选择
+# 第一个：如果功能开发完成了，可以合并主分支
+git checkout master  # 切换到主分支
+git merge dev  # 把dev分支的更改和master合并
+git push  # 提交主分支代码远程
+git checkout dev  # 切换到dev远程分支
+git push  # 提交dev分支到远程
+# 第二个：如果功能没有完成，可以直接推送
+git push  # 提交到dev远程分支
+# 注意：在分支切换之前最好先commit全部的改变，除非你真的知道自己在做什么
+
+6. 删除分支
+git push origin :dev  # 删除远程dev分支，危险命令哦
+# 下面两条是删除本地分支
+git checkout master  # 切换到master分支
+git branch -d dev  # 删除本地dev分支
+**********************************************************************
+4——方法一：分支关联
+**********************************************************************
+
+[bonniexu@rat131 hospitalsecurity]$ git branch
+
+master
+
+hospitalsecurity的主分支是master，现在想拉新分支coreui-theme的时候，首先要
+
+> git fetch origin coreui-theme
+
+然后
+
+> git checkout coreui-theme
+
+再次查看分支，可以看到工作区已换到coreui-theme
+
+[bonniexu@rat131 hospitalsecurity]$ git branch
+
+* coreui-theme
+
+master
+
+方法二：
+
+使用如下命令：gitcheckout -b 本地分支名xorigin/远程分支名x1
+
+> git checkout -b coreui-themeorigin/coreui-theme
+
+使用该方式会在本地新建分支x，并自动切换到该本地分支x。
+
+采用此种方法建立的本地分支会和远程分支建立映射关系
+**********************************************************************
+5——http://blog.51cto.com/wutengfei/2090253
+备份，迁移远程库
+**********************************************************************
+6——参与开源项目https://www.cnblogs.com/objectjava/p/5242542.html
+**********************************************************************

@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.0" halcon_version="10.0" cs="381624999">
+<procedure name="main">
+<interface/>
+<body>
+<c></c>
+<c>*./是同一级</c>
+<c>*../是再上一级</c>
+<c>***********************************************************************</c>
+<c>***********************************************************************</c>
+<c>***********************************************************************</c>
+<c>************************3**********************************************</c>
+<c>***********************************************************************</c>
+<c>***********************************************************************</c>
+<c>************************4*5*6******************************************</c>
+<c>***********************************************************************</c>
+<c>***********************************************************************</c>
+<c>***********************************************************************</c>
+<c>***********************************************************************</c>
+<l>* select_shape (RegionClosing, SelectedRegions1, 'area', 'and', 188559, 500000)</l>
+<l>* inner_circle (SelectedRegions1, Row3, Column3, Radius)</l>
+<l>* gen_circle (Circle, Row3, Column3, Radius)</l>
+<l>* select_shape (Circle, SelectedRegions, 'outer_radius', 'and', 144.58, 182.88)</l>
+<l>* smallest_rectangle1 (RegionFillUp2, Row11, Column11, Row21, Column21)</l>
+<c>* get_feature_lengths ('area', Lengths)</c>
+<l>* dev_set_draw ('margin')</l>
+<l>* gen_rectangle1 (Rectangle1, Row11, Column11, Row21, Column21)</l>
+<l>* get_image_size (Image, Width, Height)</l>
+<c>*以上这段用形态学</c>
+<c>***********************************************************************</c>
+<c>*去除外轮廓，中间区域再做一次距离变换，水域变换。</c>
+<c>*参考稻米计数</c>
+<l>path  := '../30_槟榔/13.BMP'</l>
+<l>read_image (Image, path)</l>
+<l>get_image_size (Image, Width, Height)</l>
+<l>get_image_pointer1 (Image, Pointer, Type, Width1, Height1)</l>
+<c></c>
+<l>dev_open_window (0, 0, Width1, Height1, 'black', WindowHandle1)</l>
+<l>dev_display (Image)</l>
+<l>dev_set_draw ('fill')</l>
+<l>dev_set_line_width (3)</l>
+<c></c>
+<l>gen_empty_region (EmptyRegion)</l>
+<c></c>
+<l>* decompose3 (Image, ImageR, ImageG, ImageB)</l>
+<l>get_domain (Image, Domain)</l>
+<l>threshold (Image, Regions2, 164, 255)</l>
+<c></c>
+<l>difference (Domain, Regions2, RegionDifference)</l>
+<c>*Domain做图层，different 提取目标个体</c>
+<c></c>
+<l>opening_circle (RegionDifference, RegionOpening, 5)</l>
+<l>connection (RegionOpening, ConnectedRegions1)</l>
+<c></c>
+<l>highpass_image (Image, Highpass,77, 77)</l>
+<l>bandpass_image (Highpass, ImageBandpass, 'lines')</l>
+<c></c>
+<l>erosion_circle (ConnectedRegions1, RegionErosion, 5)</l>
+<l>overpaint_region (ImageBandpass, RegionErosion, 255, 'fill')</l>
+<c></c>
+<c></c>
+<l>gen_empty_region (RegionRecurrence)</l>
+<l>count_obj (ConnectedRegions1, Number1)</l>
+<c></c>
+<l>* for Num := 1 to Number1 by 1 </l>
+<c>    </c>
+<c>    </c>
+<l>* endfor</l>
+<c>  </c>
+<c>********************************************************</c>
+<l>select_obj (ConnectedRegions1, ObjectSelected,1)</l>
+<l>smallest_rectangle1 (ObjectSelected, Row1, Column1, Row2, Column2)</l>
+<l>crop_rectangle1 (ImageBandpass, ImagePart, max2(Row1-30, 0), max2(Column1-30, 0), min2(Row2+30, Height-1), min2(Column2+30,Width-1))</l>
+<l>move_region (ObjectSelected, RegionMoved, -max2(Row1-30, 0),-max2(Column1-30, 0))</l>
+<c>********************************************************</c>
+<l>reduce_domain (ImagePart, RegionMoved, ImageReduced2)</l>
+<c></c>
+<l>threshold (ImageReduced2, Regions3, 242, 255)       </l>
+<l>fill_up_shape (Regions3, RegionFillUp3, 'area',2, 10000)</l>
+<l>opening_circle (RegionFillUp3, RegionOpening1, 10)</l>
+<l>threshold (ImageReduced2, Regions4, 0, 191)</l>
+<l>dilation_circle (Regions4, RegionDilation, 3.5)</l>
+<l>difference (RegionOpening1, RegionDilation, RegionDifference1)</l>
+<l>fill_up_shape (RegionDifference1, RegionFillUp4, 'area', 1, 10000)</l>
+<c></c>
+<l>connection (RegionFillUp4, ConnectedRegions5)</l>
+<l>closing_circle (ConnectedRegions5, RegionClosing1, 5)</l>
+<l>union1 (RegionClosing1, RegionUnion)</l>
+<c>*********************************************************</c>
+<c>*不用水域分析</c>
+<l>erosion_circle (RegionUnion, RegionErosion1,20)</l>
+<l>stop ( )</l>
+<l>stop ( )</l>
+<c></c>
+<c>*********************************************************</c>
+<l>distance_transform (RegionUnion, DistanceImage, 'euclidean', 'true', min2(Column2+30,Width-1)-max2(Column1-30, 0), min2(Row2+30, Height-1)-max2(Row1-30, 0))</l>
+<l>mean_image (DistanceImage, ImageMean, 3, 3)</l>
+<l>scale_image_max (ImageMean, ImageScaleMax1)</l>
+<l>invert_image (ImageScaleMax1, ImageInvert1)</l>
+<c></c>
+<c></c>
+<l>watersheds_threshold (ImageInvert1, Basins1,85)</l>
+<c></c>
+<l>move_region (Basins1, RegionMoved1, max2(Row1-30, 0), max2(Column1-30, 0))</l>
+<l>opening_circle (RegionMoved1, RegionOpening2, 3.5)</l>
+<l>intersection (RegionOpening2, ObjectSelected, RegionIntersection)</l>
+<l>area_center (RegionIntersection, Area2, Row4, Column4)</l>
+<l>select_obj (RegionIntersection, ObjectSelected1,find(sgn(Area2-1),1)+1)</l>
+<l>count_obj (ObjectSelected1, Number2)</l>
+<c></c>
+<l>            if(Number2 = 1)</l>
+<c>                * 分離されなかった場合、登録</c>
+<l>                concat_obj (RegionGrain, ObjectSelected1, RegionGrain)</l>
+<l>            else</l>
+<c>                * 複数に分離された場合再帰分離</c>
+<l>                concat_obj (RegionRecurrence, ObjectSelected1, RegionRecurrence)</l>
+<l>            endif</l>
+<l>stop ( )</l>
+<c></c>
+<c></c>
+<c>*******************************************************</c>
+<c>*******************************************************</c>
+<c>*******************************************************</c>
+<c>*******************************************************</c>
+<c></c>
+<c></c>
+<c>*******************************************************</c>
+<c>*只是加了sobel 一个算子*其他任然是形态学处理</c>
+<l>* sobel_amp (Image, EdgeAmplitude, 'sum_abs',9)</l>
+<l>* threshold (Image, Regions, 18, 162)</l>
+<l>* fill_up_shape (Regions, RegionFillUp, 'area', 1, 100)</l>
+<l>* connection (RegionFillUp, ConnectedRegions3)</l>
+<l>* select_shape (ConnectedRegions3, SelectedRegions, 'area', 'and', 199914, 500000)</l>
+<c></c>
+<l>* connection (SelectedRegions, ConnectedRegions4)</l>
+<l>* smallest_rectangle1 (ConnectedRegions4, Row1, Column1, Row2, Column2)</l>
+<l>* dev_set_draw ('margin')</l>
+<l>* gen_rectangle1 (Rectangle, Row1, Column1, Row2, Column2)</l>
+<l>* dev_set_draw ('fill')</l>
+<l>* distance_transform (ConnectedRegions4, DistanceImage1, 'city-block', 'true', Width, Height)</l>
+<l>* convert_image_type (DistanceImage1, ImageConverted, 'byte')</l>
+<c>*图片反转</c>
+<l>* invert_image (ImageConverted, ImageInvert)</l>
+<c>*增强对比度</c>
+<l>* dev_set_draw ('margin')</l>
+<l>* scale_image_max (ImageInvert, ImageScaleMax)</l>
+<l>* dev_set_draw ('margin')</l>
+<l>* threshold (ImageScaleMax, Regions1, 3, 165)</l>
+<l>* erosion_rectangle1 (Regions1, RegionErosion3,167,1)</l>
+<l>* fill_up (RegionErosion3, RegionFillUp1)</l>
+<l>* erosion_rectangle1 (RegionFillUp1, RegionErosion4,1,100)</l>
+<l>* dilation_circle (RegionErosion4, RegionDilation1, 10)</l>
+<l>* connection (RegionDilation1, ConnectedRegions2)</l>
+<l>* count_obj (ConnectedRegions2, Number)</l>
+<l>* area_center (ConnectedRegions2, Area, Row, Column)</l>
+<l>* for index := 0 to Number-1 by 1</l>
+<l>*     disp_message (WindowHandle1, index+1, 'RegionFillUp',Row[index], Column[index], 'black', 'true')</l>
+<l>* endfor</l>
+<c>**********************************************************************************</c>
+<c>**********************************************************************************</c>
+<c>**********************************************************************************</c>
+<c>**********************************************************************************</c>
+<c>**********************************************************************************</c>
+<l>* read_image (Blood7, 'D:/nice/blood_7.jpg')</l>
+<l>* threshold (Blood7, Regions, 10, 255)</l>
+<l>* opening_circle (Regions, RegionOpening3, 3.5)</l>
+<l>* area_center (RegionOpening3, Area3, Row5, Column5)</l>
+<l>* gen_contour_region_xld (RegionOpening3, Contours, 'border')</l>
+<l>* dev_set_color ('blue')</l>
+<l>* dev_set_line_width (3)</l>
+<l>* dev_display (Contours)</l>
+<c></c>
+<l>* gen_circle (Circle1, Row5, Column5, 1)</l>
+<l>* for phi := 0 to 359 by 1</l>
+<l>*     gen_region_line (Lines, Row5, Column5, Row5 +100*sin(rad(phi)), Column5 + 100*cos(rad(phi)))</l>
+<c>*     intersection_line_contour_xld (Contours, Row5, Column5, Row5 +100*sin(rad(phi)),  Column5 + 100*cos(rad(phi)), Row7, Column7, IsOverlapping)</c>
+<l>*     disp_cross (3600, Row7, Column7, 6, 0)</l>
+<c>    *不考虑形状更加复杂的，即一条线可能产生多个交点，这里直线外放</c>
+<l>*     dev_display (Lines)</l>
+<l>* endfor</l>
+<c></c>
+<c>*前提都是必须先是同个方向</c>
+<c>**********************************************************************************</c>
+<c>**********************************************************************************</c>
+<c>**********************************************************************************</c>
+<c>********************************************************************************** </c>
+<l>*  a := rad(60)    </l>
+<l>*  b := rad(-120)</l>
+<l>*  c := deg(3)</l>
+<c> </c>
+<l>* dev_clear_window ()</l>
+<l>* path  := './5.BMP'</l>
+<l>* set_system ('mmx_enable', 'true')</l>
+<l>* read_image (Image, path)</l>
+<l>* decompose3 (Image, ImageR, ImageG, ImageB)</l>
+<l>* emphasize (ImageR, ImageEmphasize, 11,11, 13)</l>
+<l>* gen_rectangle1 (ROI, 695.934, 2960.77, 1569.66, 3478.57)</l>
+<l>* reduce_domain (ImageEmphasize, ROI, Image_model)</l>
+<l>* crop_domain (Image_model, ImagePart)</l>
+<l>* mean_image (ImagePart, ImageMean1, 15,15)</l>
+<c></c>
+<l>* get_image_pointer1 (ImageMean1, Pointer1, Type1, Width2, Height2)</l>
+<l>* dev_open_window_fit_image (ImagePart, 0, 0,  Width2/2, Height2/2, WindowHandle2)</l>
+<c></c>
+<l>* create_local_deformable_model (ImagePart, 'auto', -0.39, 0.79, 'auto', 1, 1, 'auto', 1, 1, 'auto', 'none', 'use_polarity', 'auto', 'auto', [], [], ModelID)</l>
+<l>* get_deformable_model_contours (ModelContours, ModelID,4)</l>
+<c></c>
+<l>* union_cocircular_contours_xld (ModelContours, UnionContours, 0.5, 0.1, 0.2, 30, 10, 10, 'true', 1)</l>
+<l>* union_collinear_contours_xld (UnionContours, UnionContours1, 10, 1, 2, 0.1, 'attr_keep')</l>
+<l>* union_adjacent_contours_xld (UnionContours1, UnionContours2, 10, 1, 'attr_keep')</l>
+<l>* select_contours_xld (UnionContours2, SelectedContours, 'contour_length', 1000, 20000, -0.5, 0.5)</l>
+<l>* dev_set_line_width (3)</l>
+<l>* dev_display (UnionContours2)</l>
+<l>* area_center (Image_model, Area4, Row8, Column8)</l>
+<l>* hom_mat2d_identity (HomMat2DIdentity)</l>
+<l>* hom_mat2d_translate (HomMat2DIdentity, Row8, Column8, HomMat2DTranslate)</l>
+<c>*注意Row8 与  Column8 转换</c>
+<l>* affine_trans_contour_xld (SelectedContours, ContoursAffinTrans1, HomMat2DTranslate)</l>
+<l>* dev_display (Image)</l>
+<l>* dev_display (ContoursAffinTrans1) </l>
+<c></c>
+<c></c>
+<l>* Smoothness := 19</l>
+<l>* Numimage   := 10</l>
+<l>* path  := './6.BMP'</l>
+<l>* read_image (Image1, path)</l>
+<l>* decompose3 (Image1, ImageR1, ImageG1, ImageB1)</l>
+<l>* emphasize (ImageR1, ImageEmphasize, 11,11, 13)</l>
+<l>* mean_image (ImageEmphasize, ImageMean2, 15, 15)</l>
+<l>* get_image_size (ImageMean2, Width3, Height3)</l>
+<l>* dev_open_window_fit_image (ImageMean2, 0, 0,  Width3/5, Height3/5, WindowHandle3)</l>
+<l>* count_seconds (Seconds1)</l>
+<l>* find_local_deformable_model (ImageMean2, ImageRectified1, VectorField1, DeformedContours1, ModelID, rad(-180), rad(180),\
+                             1, 1, 1, 1, \
+                             0.32, 0, 0.7, 4, 1,\               
+                             ['vector_field','deformed_contours'], ['deformation_smoothness','expand_border','subpixel'], \
+                             [Smoothness,0,0], Score1, Row_m, Column_m)</l>
+<l>* count_seconds (Seconds2)</l>
+<l>* time := Seconds1 - Seconds2</l>
+<l>* disp_message (WindowHandle3, time, 'ImageMean2', 0, 0, 'black', 'true')</l>
+<c></c>
+<l>* union_cocircular_contours_xld (DeformedContours1, UnionContours3, 0.5, 0.1, 0.2, 30, 10, 10, 'true', 1)</l>
+<l>* union_collinear_contours_xld (UnionContours3, UnionContours4, 10, 1, 2, 0.1, 'attr_keep')</l>
+<l>* union_adjacent_contours_xld (UnionContours4, UnionContours5, 10, 1, 'attr_keep')</l>
+<l>* select_contours_xld (UnionContours5, SelectedContours1, 'contour_length', 1000, 20000, -0.5, 0.5)</l>
+<c></c>
+<l>* dev_display (ImageMean2)</l>
+<l>* count_obj (SelectedContours1, Number3)</l>
+<l>* area_center_xld (SelectedContours1, Area5, Row_Con, Column_Con, PointOrder)</l>
+<l>* dev_display (SelectedContours1)</l>
+<l>* projective_trans_contour_xld (SelectedContours1, ContoursProjTrans, HomMat2DTranslate)</l>
+<c></c>
+<l>* Num := |Score1|</l>
+<l>* for index := 1 to Num by 1</l>
+<l>*     if(Score1[index-1]&gt;0.29)</l>
+<l>*     disp_message (WindowHandle3, index, 'ImageMean2', Row_m[index-1], Column_m[index-1], 'black', 'true')   </l>
+<l>*     endif</l>
+<l>* endfor</l>
+<c></c>
+<l>* stop ( )</l>
+<c>*0.31对于3图</c>
+<c>*0.30对于9图</c>
+<c>*0.24对于1图,4图</c>
+<c>*0.32对于6图</c>
+<c>***面积法应该是准确率差不多，效率会快很多，只是受形状影响波动可能有点大。</c>
+<c>*7_25</c>
+<c>*7_28 尝试裁剪识别图片，减少处理范围，出现丢失情况，速度改观不大。</c>
+<c></c>
+<c>******************************************************************************************************</c>
+<c>******************************************************************************************************</c>
+<c>******************************************************************************************************</c>
+<c>*改进</c>
+<l>*  a := rad(60)    </l>
+<l>*  b := rad(-120)</l>
+<l>*  c := deg(3)</l>
+<c></c>
+<l>* dev_clear_window ()</l>
+<l>* path  := './5.BMP'</l>
+<l>* set_system ('mmx_enable', 'true')</l>
+<l>* read_image (Image, path)</l>
+<l>* decompose3 (Image, ImageR, ImageG, ImageB)</l>
+<l>* emphasize (ImageR, ImageEmphasize, 11,11, 13)</l>
+<l>* gen_rectangle1 (ROI, 695.934, 2960.77, 1569.66, 3478.57)</l>
+<l>* reduce_domain (ImageEmphasize, ROI, Image_model)</l>
+<l>* crop_domain (Image_model, ImagePart)</l>
+<l>* mean_image (ImagePart, ImageMean1, 15,15)</l>
+<c></c>
+<l>* get_image_pointer1 (ImageMean1, Pointer1, Type1, Width2, Height2)</l>
+<l>* dev_open_window_fit_image (ImagePart, 0, 0,  Width2/2, Height2/2, WindowHandle2)</l>
+<c></c>
+<l>* create_local_deformable_model (ImagePart, 'auto', -0.39, 0.79, 'auto', 1, 1, 'auto', 1, 1, 'auto', 'none', 'use_polarity', 'auto', 'auto', [], [], ModelID)</l>
+<l>* get_deformable_model_contours (ModelContours, ModelID,4)</l>
+<c></c>
+<l>* union_cocircular_contours_xld (ModelContours, UnionContours, 0.5, 0.1, 0.2, 30, 10, 10, 'true', 1)</l>
+<l>* union_collinear_contours_xld (UnionContours, UnionContours1, 10, 1, 2, 0.1, 'attr_keep')</l>
+<l>* union_adjacent_contours_xld (UnionContours1, UnionContours2, 10, 1, 'attr_keep')</l>
+<l>* select_contours_xld (UnionContours2, SelectedContours, 'contour_length', 1000, 20000, -0.5, 0.5)</l>
+<l>* dev_set_line_width (3)</l>
+<l>* dev_display (UnionContours2)</l>
+<l>* area_center (Image_model, Area4, Row8, Column8)</l>
+<l>* hom_mat2d_identity (HomMat2DIdentity)</l>
+<l>* hom_mat2d_translate (HomMat2DIdentity, Row8, Column8, HomMat2DTranslate)</l>
+<c>*注意Row8 与  Column8 转换</c>
+<l>* affine_trans_contour_xld (SelectedContours, ContoursAffinTrans1, HomMat2DTranslate)</l>
+<l>* dev_display (Image)</l>
+<l>* dev_display (ContoursAffinTrans1) </l>
+<c></c>
+<c></c>
+<l>* Smoothness := 19</l>
+<l>* Numimage   := 10</l>
+<l>* path  := './6.BMP'</l>
+<l>* read_image (Image1, path)</l>
+<l>* decompose3 (Image1, ImageR1, ImageG1, ImageB1)</l>
+<l>* emphasize (ImageR1, ImageEmphasize, 11,11, 13)</l>
+<l>* mean_image (ImageEmphasize, ImageMean2, 15, 15)</l>
+<l>* get_image_size (ImageMean2, Width3, Height3)</l>
+<l>* dev_open_window_fit_image (ImageMean2, 0, 0,  Width3/5, Height3/5, WindowHandle3)</l>
+<l>* count_seconds (Seconds1)</l>
+<l>* find_local_deformable_model (ImageMean2, ImageRectified1, VectorField1, DeformedContours1, ModelID, rad(-180), rad(180),\
+                             1, 1, 1, 1, \
+                             0.32, 0, 0.7, 4, 0.9,\               
+                             ['vector_field','deformed_contours'], ['deformation_smoothness','expand_border','subpixel'], \
+                             [Smoothness,0,0], Score1, Row_m, Column_m)</l>
+<l>* count_seconds (Seconds2)</l>
+<l>* time := Seconds1 - Seconds2</l>
+<l>* disp_message (WindowHandle3, time, 'ImageMean2', 0, 0, 'black', 'true')</l>
+<c></c>
+<l>* union_cocircular_contours_xld (DeformedContours1, UnionContours3, 0.5, 0.1, 0.2, 30, 10, 10, 'true', 1)</l>
+<l>* union_collinear_contours_xld (UnionContours3, UnionContours4, 10, 1, 2, 0.1, 'attr_keep')</l>
+<l>* union_adjacent_contours_xld (UnionContours4, UnionContours5, 10, 1, 'attr_keep')</l>
+<l>* select_contours_xld (UnionContours5, SelectedContours1, 'contour_length', 1000, 20000, -0.5, 0.5)</l>
+<c></c>
+<l>* dev_display (ImageMean2)</l>
+<l>* count_obj (SelectedContours1, Number3)</l>
+<l>* area_center_xld (SelectedContours1, Area5, Row_Con, Column_Con, PointOrder)</l>
+<l>* dev_display (SelectedContours1)</l>
+<l>* projective_trans_contour_xld (SelectedContours1, ContoursProjTrans, HomMat2DTranslate)</l>
+<c></c>
+<l>* Num := |Score1|</l>
+<l>* for index := 1 to Num by 1</l>
+<l>*     if(Score1[index-1]&gt;0.29)</l>
+<l>*     disp_message (WindowHandle3, index, 'ImageMean2', Row_m[index-1], Column_m[index-1], 'black', 'true')   </l>
+<l>*     endif</l>
+<l>* endfor</l>
+<l>* stop ( )</l>
+<c>   </c>
+<c>***************************************    </c>
+<l>* dev_clear_window ()</l>
+<l>* path  := './1.BMP'</l>
+<l>* read_image (Image1, path)</l>
+<l>* get_image_size (Image1, Width, Height)</l>
+<l>* dev_open_window_fit_image (Image1, 0, 0, Width/5, Height/5, WindowHandle)</l>
+<l>* dev_display (Image1)</l>
+<l>* emphasize (Image1, ImageEmphasize, 3, 7, 21)</l>
+<l>* threshold (ImageEmphasize, Regions, 0, 156)</l>
+<l>* fill_up_shape (Regions, RegionFillUp, 'area', 1, 100)</l>
+<l>* closing_circle (RegionFillUp, RegionClosing, 3.5)</l>
+<l>* connection (RegionClosing, ConnectedRegions)</l>
+<l>* select_shape (ConnectedRegions, SelectedRegions, 'area', 'and', 198305, 2e+006)</l>
+<l>* distance_transform (SelectedRegions, DistanceImage, 'city-block', 'true', Width, Height)</l>
+<l>* threshold (DistanceImage, Regions1, 72, 251)</l>
+<l>* distance_transform (Regions1, DistanceImage1, 'chamfer-3-4', 'true', Width, Height)</l>
+<c>* skeleton (Regions1, Skeleton</c>
+<l>* convert_image_type (DistanceImage1, ImageConverted, 'byte')</l>
+<l>* invert_image (ImageConverted, ImageInvert)</l>
+<l>* stop ()</l>
+<c>  </c>
+<c>**edges_sub_pix (Image, Edges1, 'canny', 1, 20, 40)</c>
+<c>**dev_display (Edges1)</c>
+<c>*最大外接方向长方形与内接长方形</c>
+<c>*水域分割，时间过长，切分不够效果不理想*****************</c>
+<c>*计算顶角个数************************不切实际</c>
+<c>*根据轮廓线交叉点********************如何实现</c>
+<c>**试一下用模板***********************普通模板匹配无法使用</c>
+<c>***欧式距离变化+高斯模糊+腐蚀（不黏连部分无需如此--只要腐蚀即可）*********部分效果可以，个别参数调整</c>
+<c>*以特定长度范围寻找--可能遮挡部分无法正确地识别出来*****如何实现</c>
+<c>*利用svm分类器进行分类****************例子学习完*******如何实现</c>
+<c>*采用深度学习的框架*****************************************************如何实现</c>
+<c>*以中腰作为区分的对象*根据5篇论文的提示*</c>
+<c></c>
+<c>*根据面积划分不同的区域，根据每一个面积的与单个的比例，统计各个区域的累计面积和。--估计准确率</c>
+<c>*模糊模板匹配***************************(大体效果可以，计算时间过长)</c>
+<c></c>
+<c></c>
+<c>**码的 用面积估算..</c>
+<c>*区域分块，每一个区域不断减去一个最大内切圆核心*******如何实现</c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+</hdevelop>

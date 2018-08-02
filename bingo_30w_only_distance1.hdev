@@ -1,42 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<hdevelop file_version="1.0" halcon_version="10.0" cs="524218121">
+<hdevelop file_version="1.0" halcon_version="10.0" cs="-899051493">
 <procedure name="main">
 <interface/>
 <body>
-<l>* count_seconds (Seconds1)</l>
-<l>* dev_clear_window ()</l>
-<l>* dev_update_window ('on')</l>
-<l>* path  := './15.BMP'</l>
-<l>* read_image (Image, path)</l>
-<l>* get_image_size (Image, Width, Height)</l>
-<l>* dev_open_window_fit_image (Image, 0, 0, Width/5, Height/5, WindowHandle)</l>
-<l>* threshold (Image, Regions, 18, 162)</l>
-<l>* fill_up_shape (Regions, RegionFillUp, 'area', 1, 100)</l>
-<l>* smallest_rectangle1 (RegionFillUp, Row1, Column1, Row2, Column2)</l>
-<l>* dev_set_draw ('margin')</l>
-<l>* gen_rectangle1 (Rectangle, Row1, Column1, Row2, Column2)</l>
-<l>* dev_set_draw ('fill')</l>
-<l>* distance_transform (RegionFillUp, DistanceImage1, 'city-block', 'true', Width, Height)</l>
-<l>* convert_image_type (DistanceImage1, ImageConverted, 'byte')</l>
+<l>count_seconds (Seconds1)</l>
+<l>dev_clear_window ()</l>
+<l>dev_update_window ('on')</l>
+<l>path  := '../30_槟榔/10.BMP'</l>
+<l>read_image (Image, path)</l>
+<l>get_image_size (Image, Width, Height)</l>
+<l>dev_open_window_fit_image (Image, 0, 0, Width, Height, WindowHandle)</l>
+<l>threshold (Image, Regions, 18, 162)</l>
+<l>fill_up_shape (Regions, RegionFillUp, 'area', 1, 1000)</l>
+<l>smallest_rectangle1 (RegionFillUp, Row1, Column1, Row2, Column2)</l>
+<l>dev_set_draw ('margin')</l>
+<l>gen_rectangle1 (Rectangle, Row1, Column1, Row2, Column2)</l>
+<l>dev_set_draw ('fill')</l>
+<l>distance_transform (RegionFillUp, DistanceImage1, 'city-block', 'true', Width, Height)</l>
+<l>convert_image_type (DistanceImage1, ImageConverted, 'byte')</l>
 <c>*图片反转</c>
-<l>* invert_image (ImageConverted, ImageInvert)</l>
+<l>invert_image (ImageConverted, ImageInvert)</l>
 <c>*增强对比度</c>
-<l>* scale_image_max (ImageInvert, ImageScaleMax)</l>
-<l>* dev_set_draw ('margin')</l>
-<l>* threshold (ImageScaleMax, Regions1, 3, 98)</l>
-<l>* erosion_rectangle1 (Regions1, RegionErosion3, 69,3)</l>
-<l>* fill_up (RegionErosion3, RegionFillUp1)</l>
-<l>* erosion_rectangle1 (RegionFillUp1, RegionErosion4, 1,13)</l>
-<l>* dilation_circle (RegionErosion4, RegionDilation1, 3.5)</l>
-<l>* connection (RegionDilation1, ConnectedRegions2)</l>
-<l>* count_obj (ConnectedRegions2, Number)</l>
-<l>* area_center (ConnectedRegions2, Area, Row, Column)</l>
-<l>* for index := 0 to Number-1 by 1</l>
-<l>*     disp_message (WindowHandle,  index+1, 'RegionFillUp',Row[index], Column[index], 'black', 'true')</l>
-<l>* endfor</l>
-<l>* count_seconds (Seconds2)</l>
-<l>* time := Seconds2-Seconds1</l>
-<l>* disp_message (WindowHandle,time, 'window', 0, 0, 'black', 'true')</l>
+<l>scale_image_max (ImageInvert, ImageScaleMax)</l>
+<l>dev_set_draw ('margin')</l>
+<l>threshold (ImageScaleMax, Regions1, 1,137)</l>
+<l>erosion_rectangle1 (Regions1, RegionErosion3, 20,1)</l>
+<l>fill_up (RegionErosion3, RegionFillUp1)</l>
+<l>erosion_rectangle1 (RegionFillUp1, RegionErosion4, 1,50)</l>
+<l>dilation_circle (RegionErosion4, RegionDilation1, 3.5)</l>
+<l>connection (RegionDilation1, ConnectedRegions2)</l>
+<l>count_obj (ConnectedRegions2, Number)</l>
+<l>area_center (ConnectedRegions2, Area, Row, Column)</l>
+<l>for index := 0 to Number-1 by 1</l>
+<l>    disp_message (WindowHandle,  index+1, 'RegionFillUp',Row[index], Column[index], 'black', 'true')</l>
+<l>endfor</l>
+<l>count_seconds (Seconds2)</l>
+<l>time := Seconds2-Seconds1</l>
+<l>disp_message (WindowHandle,time, 'window', 0, 0, 'black', 'true')</l>
+<l>stop ( )</l>
+<c>*./是同一级</c>
+<c>*../是再上一级</c>
 <c>***********************************************************************</c>
 <c>***********************************************************************</c>
 <c>***********************************************************************</c>
@@ -457,7 +460,7 @@
 <l>*     endif</l>
 <l>* endfor</l>
 <l>* stop ( )</l>
-<c>    </c>
+<c>   </c>
 <c>***************************************    </c>
 <l>* dev_clear_window ()</l>
 <l>* path  := './1.BMP'</l>
@@ -474,32 +477,11 @@
 <l>* distance_transform (SelectedRegions, DistanceImage, 'city-block', 'true', Width, Height)</l>
 <l>* threshold (DistanceImage, Regions1, 72, 251)</l>
 <l>* distance_transform (Regions1, DistanceImage1, 'chamfer-3-4', 'true', Width, Height)</l>
-<l>* skeleton (Regions1, Skeleton)</l>
-<c></c>
-<c></c>
+<c>* skeleton (Regions1, Skeleton</c>
 <l>* convert_image_type (DistanceImage1, ImageConverted, 'byte')</l>
 <l>* invert_image (ImageConverted, ImageInvert)</l>
-<c></c>
-<c></c>
-<c>    </c>
-<c>    </c>
-<c></c>
-<c>    </c>
-<c></c>
-<c></c>
 <l>* stop ()</l>
-<c></c>
-<c>    </c>
-<c>    </c>
-<c>    </c>
-<c>    </c>
-<c>    </c>
-<c>    </c>
-<c>    </c>
-<c>    </c>
-<c>    </c>
-<c>    </c>
-<c>    </c>
+<c>  </c>
 <c>**edges_sub_pix (Image, Edges1, 'canny', 1, 20, 40)</c>
 <c>**dev_display (Edges1)</c>
 <c>*最大外接方向长方形与内接长方形</c>
