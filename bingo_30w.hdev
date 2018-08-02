@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hdevelop file_version="1.2" halcon_version="18.05">
+<procedure name="main">
+<interface/>
+<body>
+<l>dev_clear_window ()</l>
+<l>path        := './text_image_data/2.BMP'</l>
+<l>set_system ('mmx_enable', 'true')</l>
+<l>read_image (Image, path)</l>
+<c>**************************创建模板*********************************************</c>
+<l>gen_rectangle1 (ROI, 20, 199.783, 365.571, 397.164)</l>
+<l>reduce_domain (Image, ROI, Image_model)</l>
+<l>crop_domain (Image_model, ImagePart)</l>
+<l>mean_image (ImagePart, ImageMean1,6, 3)</l>
+<l>get_image_pointer1 (ImagePart, Pointer1, Type1, Width2, Height2)</l>
+<l>dev_open_window_fit_image (ImagePart, 0, 0,  Width2, Height2, WindowHandle2)</l>
+<l>create_local_deformable_model (ImagePart, 'auto', -0.39, 0.79, 'auto', 1, 1, 'auto', 1, 1, 'auto', 'none', 'use_polarity', 'auto', 'auto', [], [], ModelID1)</l>
+<l>get_deformable_model_contours (ModelContours, ModelID1, 1)</l>
+<c>**************************链接选择轮廓******************************************</c>
+<l>union_cocircular_contours_xld (ModelContours, UnionContours, 0.5, 0.1, 0.2, 30, 10, 10, 'true', 1)</l>
+<l>union_collinear_contours_xld (UnionContours, UnionContours1, 10, 1, 2, 0.1, 'attr_keep')</l>
+<l>union_adjacent_contours_xld (UnionContours1, UnionContours2, 10, 1, 'attr_keep')</l>
+<l>select_contours_xld (UnionContours2, SelectedContours, 'contour_length', 100, 20000, -0.5, 0.5)</l>
+<l>dev_set_line_width (3)</l>
+<l>dev_display (SelectedContours)</l>
+<c>**************************坐标变化**********************************************</c>
+<l>area_center (Image_model, Area4, Row8, Column8)</l>
+<l>hom_mat2d_identity (HomMat2DIdentity)</l>
+<l>hom_mat2d_translate (HomMat2DIdentity, Row8, Column8, HomMat2DTranslate)</l>
+<c>*注意Row8 与 Column8 转换</c>
+<l>affine_trans_contour_xld (SelectedContours, ContoursAffinTrans1, HomMat2DTranslate)</l>
+<l>dev_display (Image)</l>
+<l>dev_display (ContoursAffinTrans1) </l>
+<c></c>
+<c>**************************模板匹配**********************************************</c>
+<l>Smoothness  := 3</l>
+<l>path        := './64.BMP'</l>
+<l>read_image (Image1, path)</l>
+<l>mean_image (Image1, ImageMean2,6,3)</l>
+<l>get_image_size (ImageMean2, Width3, Height3)</l>
+<l>dev_open_window_fit_image (Image1, 0, 0,  Width3, Height3, WindowHandle3)</l>
+<l>count_seconds (Seconds1)</l>
+<l>find_local_deformable_model (Image1, ImageRectified1, VectorField1, DeformedContours1, ModelID1, rad(-180), rad(180),\
+                             1,1,1,1,\
+                             0.35, 0, 0.6, 2, 1,\               
+                             ['vector_field','deformed_contours'], ['deformation_smoothness','expand_border','subpixel','angle_step'], \
+                             [Smoothness,0,0,rad(15)], Score1, Row_m, Column_m)</l>
+<l>union_cocircular_contours_xld (DeformedContours1, UnionContours3, 0.5, 0.1, 0.2, 30, 10, 10, 'true', 1)</l>
+<l>union_collinear_contours_xld (UnionContours3, UnionContours4, 10, 1, 2, 0.1, 'attr_keep')</l>
+<l>union_adjacent_contours_xld (UnionContours4, UnionContours5, 10, 1, 'attr_keep')</l>
+<l>select_contours_xld (UnionContours5, SelectedContours1, 'contour_length', 100, 20000, -0.5, 0.5)</l>
+<l>count_obj (SelectedContours1, Number3)</l>
+<l>dev_clear_window ( )</l>
+<l>dev_display (Image1)</l>
+<l>dev_display (DeformedContours1)</l>
+<l>Num        := |Score1|</l>
+<l>for index  := 1 to Num by 1</l>
+<l>    if(Score1[index-1]&gt;0.35)</l>
+<l>    disp_message (WindowHandle3, index, 'ImageMean2', Row_m[index-1], Column_m[index-1], 'black', 'true')   </l>
+<l>    endif</l>
+<l>endfor</l>
+<l>count_seconds (Seconds2)</l>
+<l>time       := Seconds2 - Seconds1</l>
+<l>disp_message (WindowHandle3, time, 'ImageMean2', 0, 0, 'black', 'true')</l>
+<l>stop ( )</l>
+<c>***********************************************************************</c>
+<c>********************************整理注释********************************</c>
+<c>***********************************************************************</c>
+<l>Smoothness        := 3</l>
+<l>Score             := 0.35</l>
+<l>Cover             := 0.5</l>
+<l>Angle             := rad(15)</l>
+<l>Ele_Con_L         := 100</l>
+<l>Ele_Con_H         := 20000</l>
+<l>Tuple             := [Smoothness,Score,Cover,Angle,Ele_Con_L,Ele_Con_H,WindowHandle3]</l>
+<l>Find_instance (Image, DeformedContours1, Tuple, Score1, Row_m, Column_m)</l>
+<c>************************************************************************</c>
+<c>*********************************注释 **********************************</c>
+<c>************************************************************************</c>
+<c>* Smoothness      :find_local_deformable_model 中的平滑度指数</c>
+<c>* Score           :find_local_deformable_model 中的匹配度</c>
+<c>* Cover           :find_local_deformable_model 中的覆盖率</c>
+<c>* Angle           :find_local_deformable_model 中的匹配每次跨度（弧度）</c>
+<c>* Ele_Con_L       :函数Find_instance中 选择轮廓的最小长度值</c>
+<c>* Ele_Con_H       :函数Find_instance中 选择轮廓的最大长度值</c>
+<c>* Tuple           :数组，保存以上各个参数的数值</c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c>*轻度黏连，大可降低覆盖率，提高识别度，运行时间大大缩短。</c>
+<c>*识别度0.4--覆盖率0.3---smooth16,对于16。</c>
+<c>*识别度0.35--覆盖率0.5---smooth19  对于4,6,7,24，19，16，13,12,26,42,54，51,8,33,34,</c>
+<c>*识别度0.32--覆盖率0.5---smooth 9 ，加angle_step rad(2),速度更快。对于 24,39(尾端缺角)</c>
+<c>*识别度0.25--覆盖率0.4---smooth 3 ,rad(4)对于 57 (时间久---1.6),rad(9) 对于56</c>
+<c>*22比较特殊</c>
+<c>*直接采用彩色相机效果如何</c>
+<c>*rad(3) 跟换 pixel 为angle_step 之后，速度提高5倍,黏连程度不高以及形状不要过于怪异的情况下</c>
+<c>*使用subpixel精度比较高，时间久，使用angle_step，速度快，但是精度略差。</c>
+<c>*8_2</c>
+<c>*增加角度参数--</c>
+<c>**识别度0.35--覆盖率0.5---smooth 9--rad 10 对于 3</c>
+<c>**识别度0.35--覆盖率0.5---smooth 9--rad 2 对于 4 </c>
+<c>**识别度0.35--覆盖率0.5---smooth 9--rad 3 对于 8,9,</c>
+<c>**识别度0.35--覆盖率0.5---smooth 9--rad 9 对于 36(0.44秒)</c>
+<c>**识别度0.29--覆盖率0.5---smooth 9--rad 9 对于 35(0.46秒),33,</c>
+<c>*0.31--0.48--9--3  对于 10,11,</c>
+<c>*0.3 --0.5--9--4  对于 38 （0.34--39）</c>
+<c>*对于没有被完整包括的 不设定进行识别</c>
+<c>*图像密集度影响效果</c>
+<c>*</c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+<c></c>
+</body>
+<docu id="main">
+<parameters/>
+</docu>
+</procedure>
+<procedure name="Find_instance">
+<interface>
+<io>
+<par name="Image" base_type="iconic" dimension="0"/>
+</io>
+<oo>
+<par name="DeformedContours1" base_type="iconic" dimension="0"/>
+</oo>
+<ic>
+<par name="Tuple" base_type="ctrl" dimension="0"/>
+</ic>
+<oc>
+<par name="Score1" base_type="ctrl" dimension="0"/>
+<par name="Row_m" base_type="ctrl" dimension="0"/>
+<par name="Column_m" base_type="ctrl" dimension="0"/>
+</oc>
+</interface>
+<body>
+<c></c>
+<l>return ()</l>
+</body>
+<docu id="Find_instance">
+<parameters>
+<parameter id="Column_m"/>
+<parameter id="DeformedContours1"/>
+<parameter id="Image"/>
+<parameter id="Row_m"/>
+<parameter id="Score1"/>
+<parameter id="Tuple"/>
+</parameters>
+</docu>
+</procedure>
+</hdevelop>
