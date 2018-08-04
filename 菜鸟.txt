@@ -1,0 +1,8 @@
+learning new commend from cainiao jiaocheng
+
+
+
+touch : creat a new file
+vim [file] :open a file ,with or without edit is ok. push exit and tide :wq to 
+quit from the edit plotfrom
+
