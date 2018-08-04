@@ -1,0 +1,9 @@
+防止失误操作，测试使用。
+1.修改下内容--当git出现以下内容时 refusing to merge unrelated histories
+
+git merge <对应的分支> --allow-unrelated-histories
+之后会进入vim ,这时候需要输出commit的补充内容
+git commit -m"补充信息"
+然后esc退出输入，再输入:wq 即可
+
+测试一下是否加双引号引导可以提交带文件名带空格的文件。
