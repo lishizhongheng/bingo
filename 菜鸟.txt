@@ -1,5 +1,7 @@
 learning new commend from cainiao jiaocheng
 
+if quit from vim unnormally ,you need tu quit vim.exe from window  working  lists
+
 
 
 touch : creat a new file
