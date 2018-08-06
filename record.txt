@@ -1,2 +1,6 @@
-keep using git everyday ,this file is use to get femmily with this language 
+keep using git everyday ,this file is use to get femmily with this language
+
+learning somthing about python
+
+but the most important is c++
 
