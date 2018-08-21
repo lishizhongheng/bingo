@@ -4,3 +4,11 @@ learning somthing about python
 
 but the most important is c++
 
+8_21 
+face a new problem 
+when i usd commmand :git push orgin master
+told that : everything is up to date
+
+search on the internet find that : all more command :"git add ." and "git commit -m"" ",still didnot solve the problem
+
+
